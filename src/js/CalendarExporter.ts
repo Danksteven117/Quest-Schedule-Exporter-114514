@@ -49,6 +49,16 @@ export class CalendarExporter {
                 break
             }
 
+            // The section regex is global (stateful), so it must be reset for every course
+            sectionRegex.lastIndex = 0
+
+            // Quest lists extra meeting times of the same class (e.g. a Wednesday
+            // lecture that only runs on certain dates) as continuation rows that
+            // have NO class number / section / component. They belong to the
+            // most recent row that did have them.
+            let lastSection = ''
+            let lastType = ''
+
             let sectionLoopCount = 0
             let sectionMatches = null
 
@@ -63,6 +73,12 @@ export class CalendarExporter {
                     break
                 }
 
+                // Groups 2 and 3 are undefined on continuation rows
+                if (sectionMatches[2] !== undefined) {
+                    lastSection = sectionMatches[2]
+                    lastType = sectionMatches[3]
+                }
+
                 if (sectionMatches[4] === 'TBA') {
                     continue
                 }
@@ -71,8 +87,8 @@ export class CalendarExporter {
                     courseMatches[1],
                     courseMatches[2],
 
-                    sectionMatches[2],
-                    sectionMatches[3],
+                    lastSection,
+                    lastType,
                     sectionMatches[8],
                     sectionMatches[9],
 
@@ -167,9 +183,11 @@ function createSectionRegex(questData: string): RegExp {
     }
 
     const regex =
-        '(' + classNumberPattern + ')\\s*' + // Class number
-        '(\\d{3}\\s*)' + // Section
-        '(\\w{3}\\s*)' + // Type (LEC, SEM, STU, LAB)
+        '(?:' + // Header is optional: continuation rows only have days/times/room/instructor/dates
+            '(' + classNumberPattern + ')\\s*' + // Class number
+            '(\\d{3}\\s*)' + // Section
+            '(\\w{3}\\s*)' + // Type (LEC, SEM, STU, LAB)
+        ')?' +
         patternOrTba(
             '([MThWF]{0,6})\\s*' + // Days
             '(' + timePattern + ')\\ -\\ ' + // Start time
@@ -177,11 +195,11 @@ function createSectionRegex(questData: string): RegExp {
             '',
         ) +
         patternOrTba(
-            '[\\w\\ ]+\\s*[0-9]{1,5}[A-Z]?' + // Location
+            '[\\w\\ \\-\\.]*?[0-9]{1,5}[A-Z]?|ONLINE|ONLN ONLINE' + // Location
             '',
         ) +
         patternOrTba(
-            '[A-Za-z_\\ \\-\\,\\s]+' + // Professor
+            '[^\\d]*' + // Professor (any non-digit text: allows apostrophes, periods, accents)
             '',
         ) +
         '(\\d{2,4}\\/\\d{2,4}\\/\\d{2,4})\\ -\\ ' + // Start date
