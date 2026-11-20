@@ -2,8 +2,8 @@
     "pageTitle": "Quest Schedule Exporter",
     "pageDesc": "This tool allows University of Waterloo students to export their class schedule from Quest into an iCalendar file that you can then import anywhere. Everything is done inside the web browser so you can rest assured that your personal data will not be leaked.",
 
-    "MAX_COURSES": 20,
-    "MAX_SECTIONS": 5,
+    "MAX_COURSES": 30,
+    "MAX_SECTIONS": 200,
 
     "filename": "quest_schedule.ics",
 
