@@ -86,7 +86,7 @@ export class Course {
 
         // Parse the time in 12H format to return a DateTime object on the firstDateOfClass
         const parseTime = function(timeString: string): NullableDate {
-            const matches = /(1?\d):([0-5]\d)/.exec(timeString)
+            const matches = /(\d{1,2}):([0-5]\d)/.exec(timeString)
             if (!matches) {
                 return null
             }
