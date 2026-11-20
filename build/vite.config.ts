@@ -9,6 +9,7 @@ const srcDir = path.resolve(rootDir, 'src')
 
 export default defineConfig({
     root: srcDir,
+    base: './', // relative asset paths so it works at https://<user>.github.io/<repo>/
 
     build: {
         sourcemap: false,
